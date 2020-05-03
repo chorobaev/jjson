@@ -6,6 +6,8 @@ properties from being serialized, and custom serializers for specific properties
 Annotations are used to apply serialization options.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Version: v1.0.0](https://img.shields.io/badge/Version-v1.0.0-brightgreen)](https://opensource.org/licenses/MIT)
+
 
 **Note:** This project has been created for educational purpose.
 
