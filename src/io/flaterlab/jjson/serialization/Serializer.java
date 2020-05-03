@@ -1,6 +1,6 @@
 package io.flaterlab.jjson.serialization;
 
-import io.flaterlab.jjson.Utility;
+import io.flaterlab.jjson.Callback;
 import io.flaterlab.jjson.annotations.JsonExclude;
 import io.flaterlab.jjson.annotations.JsonName;
 import io.flaterlab.jjson.annotations.JsonSerializer;
@@ -13,7 +13,7 @@ import java.util.List;
 
 public class Serializer {
 
-    public String serialize(Object object) {
+    public static String serialize(Object object) {
         StringBuilder sb = new StringBuilder();
 
         serializeObject(sb, object);
@@ -21,7 +21,7 @@ public class Serializer {
         return sb.toString();
     }
 
-    private void serializeObject(StringBuilder sb, Object obj) {
+    private static void serializeObject(StringBuilder sb, Object obj) {
         Field[] fds = obj.getClass().getDeclaredFields();
         List<Field> fields = new ArrayList<>();
 
@@ -29,12 +29,29 @@ public class Serializer {
             if (f.getAnnotation(JsonExclude.class) == null) fields.add(f);
         }
 
-        Utility.joinIterable(fields, sb, "{", "}", filed -> {
+        joinIterable(fields, sb, "{", "}", filed -> {
             serializeField(sb, filed, obj);
         });
     }
 
-    private void serializeField(StringBuilder sb, Field field, Object obj) {
+    private static <T> void joinIterable(
+        Iterable<T> ths,
+        StringBuilder sb,
+        CharSequence prefix,
+        CharSequence postfix,
+        Callback<T> callback
+    ) {
+        sb.append(prefix);
+        int count = 0;
+
+        for (T element : ths) {
+            if (++count > 1) sb.append(",");
+            callback.call(element);
+        }
+        sb.append(postfix);
+    }
+
+    private static void serializeField(StringBuilder sb, Field field, Object obj) {
         if (Modifier.isPrivate(field.getModifiers())) {
             field.setAccessible(true);
         }
@@ -59,7 +76,7 @@ public class Serializer {
         serializeFieldValue(sb, value);
     }
 
-    private ValueSerializer<Object> getSerializer(Field field) {
+    private static ValueSerializer<Object> getSerializer(Field field) {
         JsonSerializer JsonSerializerAnn = field.getAnnotation(JsonSerializer.class);
         if (JsonSerializerAnn == null) return null;
 
@@ -73,7 +90,7 @@ public class Serializer {
         }
     }
 
-    private void serializeFieldValue(StringBuilder sb, Object value) {
+    private static void serializeFieldValue(StringBuilder sb, Object value) {
         if (value == null) sb.append("null");
         else if (value instanceof String) serializeString(sb, (String) value);
         else if (value instanceof Number || value instanceof Boolean) sb.append(value.toString());
@@ -81,13 +98,13 @@ public class Serializer {
         else serializeObject(sb, value);
     }
 
-    private void serializeList(StringBuilder sb, List<Object> list) {
-        Utility.joinIterable(list, sb, "[", "]", data -> {
+    private static void serializeList(StringBuilder sb, List<Object> list) {
+        joinIterable(list, sb, "[", "]", data -> {
             serializeFieldValue(sb, data);
         });
     }
 
-    private void serializeString(StringBuilder sb, String s) {
+    private static void serializeString(StringBuilder sb, String s) {
         sb.append('\"');
         for (int i = 0; i < s.length(); i++) {
             sb.append(escape(s.charAt(i)));
@@ -95,7 +112,7 @@ public class Serializer {
         sb.append('\"');
     }
 
-    private Object escape(char ch) {
+    private static Object escape(char ch) {
         if (ch == '\\') return "\\\\";
         if (ch == '\"') return "\\\"";
         if (ch == '\b') return "\\b";

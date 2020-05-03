@@ -9,21 +9,16 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Book {
-    @JsonName(name = "title")
     private String name;
-
     private int pages;
-
-    @JsonSerializer(serializerClass = MySerializer.class)
     private List<String> authors;
+    private String ISBN;
 
-    @JsonExclude
-    private int excludedValue;
-
-    public Book(String name, int pages, List<String> authors) {
+    public Book(String name, int pages, List<String> authors, String ISBN) {
         this.name = name;
         this.pages = pages;
         this.authors = authors;
+        this.ISBN = ISBN;
     }
 
     public String getName() {
@@ -50,12 +45,12 @@ public class Book {
         this.authors = authors;
     }
 
-    public int getExcludedValue() {
-        return excludedValue;
+    public String getISBN() {
+        return ISBN;
     }
 
-    public void setExcludedValue(int excludedValue) {
-        this.excludedValue = excludedValue;
+    public void setISBN(String ISBN) {
+        this.ISBN = ISBN;
     }
 
     public static class MySerializer implements ValueSerializer<List<String>> {
