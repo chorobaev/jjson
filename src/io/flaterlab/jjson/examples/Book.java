@@ -3,22 +3,29 @@ package io.flaterlab.jjson.examples;
 import io.flaterlab.jjson.annotations.JsonExclude;
 import io.flaterlab.jjson.annotations.JsonName;
 import io.flaterlab.jjson.annotations.JsonSerializer;
-import io.flaterlab.jjson.annotations.ValueSerializer;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Book {
+    @JsonName(name = "title")
     private String name;
     private int pages;
+    @JsonSerializer(serializerClass = MySerializer.class)
     private List<String> authors;
+    @JsonExclude
     private String ISBN;
+    private Address address;
 
     public Book(String name, int pages, List<String> authors, String ISBN) {
         this.name = name;
         this.pages = pages;
         this.authors = authors;
         this.ISBN = ISBN;
+    }
+
+    public Book(String name, int pages, List<String> authors, String ISBN, Address address) {
+        this(name, pages, authors, ISBN);
+        this.address = address;
     }
 
     public String getName() {
@@ -53,24 +60,11 @@ public class Book {
         this.ISBN = ISBN;
     }
 
-    public static class MySerializer implements ValueSerializer<List<String>> {
+    public Address getAddress() {
+        return address;
+    }
 
-        @Override
-        public Object toJsonValue(List<String> value) {
-            if (value.size() == 0) return "Not specified";
-            StringBuilder sb = new StringBuilder();
-            final AtomicBoolean start = new AtomicBoolean(true);
-            value.forEach(val -> {
-                if (!start.get()) sb.append(" & ");
-                start.set(false);
-                sb.append(val);
-            });
-            return sb.toString();
-        }
-
-        @Override
-        public List<String> fromJsonValue(Object object) {
-            return null;
-        }
+    public void setAddress(Address address) {
+        this.address = address;
     }
 }
